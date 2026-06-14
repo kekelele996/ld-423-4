@@ -14,4 +14,5 @@ export interface ChartConfig {
   legendPosition: 'top' | 'right' | 'bottom' | 'left';
   customStyle: Record<string, unknown>;
   tags: string[];
+  deletedAt?: string;
 }

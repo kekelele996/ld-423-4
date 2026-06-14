@@ -18,4 +18,5 @@ export interface Dataset {
   columns: ColumnDefinition[];
   tags: string[];
   data: DatasetRow[];
+  deletedAt?: string;
 }

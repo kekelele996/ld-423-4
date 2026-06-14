@@ -15,6 +15,16 @@ class ResearchDataDb extends Dexie {
       reports: 'id, name, updatedAt, exportStatus',
       filters: 'id, datasetId, fieldName, active',
     });
+    this.version(2).stores({
+      datasets: 'id, name, importedAt, *tags, deletedAt',
+      charts: 'id, datasetId, name, type, *tags, deletedAt',
+      reports: 'id, name, updatedAt, exportStatus, deletedAt',
+      filters: 'id, datasetId, fieldName, active',
+    }).upgrade((tx) => {
+      return tx.table('datasets').toCollection().modify((dataset) => {
+        if (!dataset.deletedAt) dataset.deletedAt = undefined;
+      });
+    });
   }
 }
 

@@ -15,4 +15,5 @@ export interface Report {
   chartIds: string[];
   layout: ReportLayoutItem[];
   exportStatus: 'Draft' | 'Ready' | 'Exported';
+  deletedAt?: string;
 }

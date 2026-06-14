@@ -14,6 +14,7 @@ export const Workspace = () => {
   const addDataset = useDatasetStore((state) => state.addDataset);
   const selectDataset = useDatasetStore((state) => state.selectDataset);
   const updateColumnType = useDatasetStore((state) => state.updateColumnType);
+  const removeDataset = useDatasetStore((state) => state.removeDataset);
   const dataset = datasets.find((candidate) => candidate.id === selectedDatasetId);
 
   useEffect(() => {
@@ -46,10 +47,24 @@ export const Workspace = () => {
         <div className="workspace-grid">
           <aside className="dataset-list">
             {datasets.map((candidate) => (
-              <button key={candidate.id} className={candidate.id === dataset.id ? 'is-active' : ''} onClick={() => selectDataset(candidate.id)}>
-                <strong>{candidate.name}</strong>
-                <span>{candidate.rowCount} 行 · {candidate.columnCount} 列</span>
-              </button>
+              <div key={candidate.id} className="dataset-item">
+                <button className={candidate.id === dataset.id ? 'is-active' : ''} onClick={() => selectDataset(candidate.id)}>
+                  <strong>{candidate.name}</strong>
+                  <span>{candidate.rowCount} 行 · {candidate.columnCount} 列</span>
+                </button>
+                <button
+                  className="delete-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (confirm(`确定要删除数据集「${candidate.name}」吗？删除后可在回收站中恢复。`)) {
+                      void removeDataset(candidate.id);
+                    }
+                  }}
+                  title="删除数据集"
+                >
+                  ×
+                </button>
+              </div>
             ))}
           </aside>
           <section className="data-panel">

@@ -19,13 +19,14 @@ interface ReportState {
   loadReports: () => Promise<void>;
   saveReport: (report: Report) => Promise<void>;
   setActiveReport: (reportId: string) => void;
+  removeReport: (reportId: string) => Promise<void>;
 }
 
 export const useReportStore = create<ReportState>((set, get) => ({
   reports: [demoReport],
   activeReportId: demoReport.id,
   loadReports: async () => {
-    const persisted = await db.reports.toArray();
+    const persisted = await db.reports.filter((r) => !r.deletedAt).toArray();
     if (persisted.length === 0) {
       await db.reports.put(demoReport);
       return;
@@ -38,4 +39,16 @@ export const useReportStore = create<ReportState>((set, get) => ({
     set({ reports: exists ? get().reports.map((candidate) => (candidate.id === report.id ? report : candidate)) : [report, ...get().reports] });
   },
   setActiveReport: (reportId) => set({ activeReportId: reportId }),
+  removeReport: async (reportId) => {
+    const report = await db.reports.get(reportId);
+    if (report) {
+      report.deletedAt = new Date().toISOString();
+      await db.reports.put(report);
+      const remaining = get().reports.filter((r) => r.id !== reportId);
+      set({
+        reports: remaining,
+        activeReportId: remaining.length > 0 ? remaining[0].id : '',
+      });
+    }
+  },
 }));

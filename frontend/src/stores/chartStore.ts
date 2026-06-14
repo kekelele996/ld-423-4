@@ -16,7 +16,7 @@ export const useChartStore = create<ChartState>((set, get) => ({
   charts: [sampleChart],
   selectedChartId: sampleChart.id,
   loadCharts: async () => {
-    const persisted = await db.charts.toArray();
+    const persisted = await db.charts.filter((c) => !c.deletedAt).toArray();
     if (persisted.length === 0) {
       await db.charts.put(sampleChart);
       return;
@@ -30,7 +30,15 @@ export const useChartStore = create<ChartState>((set, get) => ({
   },
   selectChart: (chartId) => set({ selectedChartId: chartId }),
   removeChart: async (chartId) => {
-    await db.charts.delete(chartId);
-    set({ charts: get().charts.filter((chart) => chart.id !== chartId) });
+    const chart = await db.charts.get(chartId);
+    if (chart) {
+      chart.deletedAt = new Date().toISOString();
+      await db.charts.put(chart);
+      const remaining = get().charts.filter((c) => c.id !== chartId);
+      set({
+        charts: remaining,
+        selectedChartId: remaining.length > 0 ? remaining[0].id : '',
+      });
+    }
   },
 }));
